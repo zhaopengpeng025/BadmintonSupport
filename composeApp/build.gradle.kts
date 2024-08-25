@@ -32,6 +32,8 @@ kotlin {
     androidMain.dependencies {
       implementation(compose.preview)
       implementation(libs.androidx.activity.compose)
+
+
     }
     commonMain.dependencies {
 
@@ -47,7 +49,6 @@ kotlin {
       implementation(libs.androidx.navigation.compose)
       implementation(libs.kotlinx.datetime)
 
-      implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     }
   }
 }
@@ -88,4 +89,5 @@ android {
     debugImplementation(compose.uiTooling)
   }
 }
+
 
