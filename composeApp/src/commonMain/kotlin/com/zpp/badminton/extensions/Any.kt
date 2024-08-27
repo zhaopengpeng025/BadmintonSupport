@@ -1,6 +1,7 @@
 package com.zpp.badminton.extensions
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -16,5 +17,7 @@ fun LocalDateTime.dateString(): String {
 }
 
 fun currentDateTime() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+fun Long.toDate() = Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
 
 

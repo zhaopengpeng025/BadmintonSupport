@@ -4,35 +4,39 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.zpp.badminton.data.TournamentMemoryDataSource
 import com.zpp.badminton.model.Game
 import com.zpp.badminton.model.Gender
 import com.zpp.badminton.model.GoalType
 import com.zpp.badminton.model.Lineup
 import com.zpp.badminton.model.Player
 import com.zpp.badminton.model.Tournament
-import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.random.Random
 
 class CreateViewModel : ViewModel() {
   var title by mutableStateOf("")
-  var tournamentDate by mutableStateOf("")
+  var dateMilliSecond by mutableStateOf(Clock.System.now().toEpochMilliseconds())
   var participantsInfo by mutableStateOf(
     """
     #接龙
     周三没抢到场地，本周活动时间改为周四2和3号场地，时间18-20点，限16人，本周玩法为A,B组对抗娱乐赛，玩家通过抽签选定A，B组，输的团队要给赢的团队买水，混双对男双，男双发球时不能偷后场，21分制，团队赛赢一场积两分，三局两胜，裁判自由担任，球若干，其余费用AA，先接龙后续微信小程序抽A,B组。                                    注:本次为私下约球赛，大家跟平时一样打即可，当然做好买水准备
 
-    1. 懿安
-    2. 张新,1
-    3. 空指针 
-    4. 陈扬
-    5. 郑云霄,1
-    6. 王半斤,0
-    7. 剑平
+    1. Tony
+    2. Mary,1
+    3. Anthony 
+    4. LeBron
+    5. Tracy,1
+    6. McGrady,0
+    7. Sar
     8. Jacob
-    9. 抽本抽,1
-    10. Vonyo,1
-    11. 建文
-    12. 张炜
+    9. Tiago,1
+    10. Taylor,1
+    11. Messi
+    12. Nadal
   """.trimIndent()
   )
   var goalType by mutableStateOf(GoalType.TwentyOne)
@@ -50,8 +54,12 @@ class CreateViewModel : ViewModel() {
   }
 
 
-  fun generateTournament(title: String, date: String): Tournament {
-    val tournament = Tournament(title, LocalDateTime.parse(date))
+  fun generateTournament(): Tournament {
+    val tournament = Tournament(
+      title, Instant.fromEpochMilliseconds(dateMilliSecond).toLocalDateTime(
+        TimeZone.currentSystemDefault()
+      )
+    )
     participantsInfo.split("\n")
       .filter { it.matches(Regex("^[0-9].*")) }
       .map { it.replace(Regex("\\d+\\."), "") }
@@ -86,6 +94,7 @@ class CreateViewModel : ViewModel() {
       }.let {
         tournament.games = it
       }
+    TournamentMemoryDataSource.addTournament(tournament)
     return tournament
   }
 

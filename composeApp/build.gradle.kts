@@ -49,6 +49,8 @@ kotlin {
       implementation(libs.androidx.navigation.compose)
       implementation(libs.kotlinx.datetime)
 
+      implementation(libs.material3)
+
     }
   }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.zpp.badminton.data.TournamentMemoryDataSource
 import com.zpp.badminton.ui.page.GameList
 import com.zpp.badminton.ui.page.CreateTournament
 import com.zpp.badminton.ui.page.ParticipantsEditor
@@ -35,7 +36,7 @@ private fun AppNavigation() {
     composable("$TournamentDetail/{title}",) { entry ->
       val title = entry.arguments?.getString("title") ?: ""
       println("navigation title:$title")
-      title.let { mainViewModel.tournaments.find { it.title == title } }
+      title.let { TournamentMemoryDataSource.getTournament(it) }
         ?.let { TournamentDetail(it,navController) }?: throw IllegalStateException("找不到相关比赛")
     }
     composable(GameList) {
