@@ -28,8 +28,6 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
@@ -40,13 +38,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.T
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
 import androidx.navigation.NavHostController
 import com.zpp.badminton.extensions.dateString
 import com.zpp.badminton.extensions.toDate
@@ -71,7 +65,7 @@ fun CreateTournament(
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-      var titleError by remember { mutableStateOf(true) }
+      var titleError by remember { mutableStateOf(viewModel.title.isEmpty() ) }
       Column(Modifier.fillMaxWidth().padding(10.dp)) {
         OutlinedTextField(
           value = viewModel.title,
@@ -108,13 +102,13 @@ fun CreateTournament(
 
       Button(
         onClick = {
-          viewModel.generateTournament().let {
+          viewModel.createTournament().let {
             navController.navigate("$TournamentDetail/${viewModel.title}")
           }
         }, modifier = Modifier.padding(top = 50.dp, bottom = 20.dp).fillMaxWidth(0.8f),
         enabled = !titleError
       ) {
-        Text("生成比赛")
+        Text("创建比赛")
       }
     }
   }

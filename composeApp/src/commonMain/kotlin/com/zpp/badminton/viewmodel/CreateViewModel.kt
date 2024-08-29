@@ -9,6 +9,7 @@ import com.zpp.badminton.model.Game
 import com.zpp.badminton.model.Gender
 import com.zpp.badminton.model.GoalType
 import com.zpp.badminton.model.Lineup
+import com.zpp.badminton.model.LineupType
 import com.zpp.badminton.model.Player
 import com.zpp.badminton.model.Tournament
 import kotlinx.datetime.Clock
@@ -54,16 +55,14 @@ class CreateViewModel : ViewModel() {
   }
 
 
-  fun generateTournament(): Tournament {
+  fun createTournament(): Tournament {
     val tournament = Tournament(
       title, Instant.fromEpochMilliseconds(dateMilliSecond).toLocalDateTime(
         TimeZone.currentSystemDefault()
       )
     )
-    participantsInfo.split("\n")
-      .filter { it.matches(Regex("^[0-9].*")) }
-      .map { it.replace(Regex("\\d+\\."), "") }
-      .map {
+    participantsInfo.split("\n").filter { it.matches(Regex("^[0-9].*")) }
+      .map { it.replace(Regex("\\d+\\."), "") }.map {
         it.split(",").let { arr ->
           if (arr.size > 1) {
             Player(arr[0], Gender.entries[arr[1].trim().toInt()])
@@ -71,8 +70,7 @@ class CreateViewModel : ViewModel() {
             Player(it)
           }
         }
-      }
-      .let { participants ->
+      }.let { participants ->
         tournament.participants = participants
         val histories = mutableListOf<Lineup>()
         mutableListOf<List<Lineup>>().also { groups ->
@@ -86,21 +84,52 @@ class CreateViewModel : ViewModel() {
           groups.forEach { groups ->
             groups.shuffled()
             for (i in groups.indices step 2) {
-              games.add(Game(groups[i], groups[i + 1]))
-
+              games.add(Game(groups[i], groups[i + 1]).also {
+                assignScoreOffset(it)
+              })
             }
           }
         }
       }.let {
         tournament.games = it
       }
+    println("tournament games = ${tournament.games}")
     TournamentMemoryDataSource.addTournament(tournament)
     return tournament
   }
 
+  /**
+   * 根据两个队伍类型，分配让分
+   * [LineupType.MenDouble] vs [LineupType.MixedDouble] 让 [maleVsMix] 分
+   * [LineupType.MenDouble] vs [LineupType.WomenDouble] 让 [maleVsFemale] 分
+   * [LineupType.MixedDouble] vs [LineupType.WomenDouble] 让 [mixVsFemale] 分
+   * @param game Game
+   */
+  private fun assignScoreOffset(game: Game) {
+    when (game.first.lineupType) {
+      LineupType.MenDouble -> when (game.second.lineupType) {
+        LineupType.MixedDouble -> game.second.score = maleVsMix
+        LineupType.WomenDouble -> game.second.score = maleVsFemale
+        else -> {}
+      }
+      LineupType.MixedDouble -> when (game.second.lineupType) {
+        LineupType.MenDouble -> game.first.score = maleVsMix
+        LineupType.WomenDouble -> game.second.score = mixVsFemale
+        else -> {}
+      }
+      LineupType.WomenDouble -> when (game.second.lineupType) {
+        LineupType.MenDouble -> game.first.score = maleVsFemale
+        LineupType.MixedDouble -> game.first.score = mixVsFemale
+        LineupType.WomenDouble -> {}
+      }
+    }
+    println("game >>>>>>>>>>>>> = ${game.first.lineupType} vs ${game.second.lineupType} ${game.first.score}:${game.second.score}")
+    println("game =============== ${game.first} vs ${game.second}")
+  }
+
+
   private fun generateRandomPairs(
-    usedPairs: MutableList<Lineup>,
-    list: List<Player>
+    usedPairs: MutableList<Lineup>, list: List<Player>
   ): List<Lineup> {
 
     val pairs = mutableListOf<Lineup>()
